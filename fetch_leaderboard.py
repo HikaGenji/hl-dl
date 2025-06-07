@@ -88,11 +88,11 @@ def save_to_csv(df, output_dir='data'):
 
     # Generate filename with current date
     current_date = datetime.utcnow().strftime('%Y-%m-%d')
-    filename = f"leaderboard_{current_date}.csv"
+    filename = f"leaderboard_{current_date}.parquet"
     filepath = os.path.join(output_dir, filename)
 
-    # Save to CSV
-    df.to_csv(filepath, index=False)
+    # Save to parquet
+    df.to_parquet(filepath, index=False)
 
     logger.info(f"Saved {len(df)} rows to {filepath}")
     logger.info(f"Columns: {list(df.columns)}")
