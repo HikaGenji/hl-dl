@@ -1,0 +1,101 @@
+name: Fetch Hyperliquid Leaderboard Data (Corrected)
+
+on:
+  schedule:
+    # Run daily at midnight UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-leaderboard:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Create data directory
+      run: mkdir -p data
+      
+    - name: Run leaderboard fetcher (corrected version)
+      run: |
+        python fetch_leaderboard.py
+        
+    - name: Verify data structure
+      run: |
+        if [ -f data/leaderboard_*.csv ]; then
+          echo "✅ CSV file created successfully"
+          latest_file=$(ls -t data/leaderboard_*.csv | head -1)
+          echo "📊 Latest file: $latest_file"
+          echo "📈 File size: $(du -h $latest_file)"
+          echo "🔢 Row count: $(wc -l < $latest_file)"
+          echo ""
+          echo "📋 Column headers:"
+          head -1 $latest_file | tr ',' '\n' | nl
+          echo ""
+          echo "👀 First data row preview:"
+          sed -n '2p' $latest_file | cut -d',' -f1-10
+        else
+          echo "❌ No CSV file found"
+          exit 1
+        fi
+        
+    - name: Commit and push data
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Check if there are any changes
+        if [ -n "$(git status --porcelain)" ]; then
+          git add data/
+          
+          # Get current date for commit message
+          current_date=$(date -u +"%Y-%m-%d")
+          
+          # Count files and get latest file info
+          csv_count=$(ls data/leaderboard_*.csv 2>/dev/null | wc -l)
+          latest_file=$(ls -t data/leaderboard_*.csv 2>/dev/null | head -1)
+          
+          if [ -f "$latest_file" ]; then
+            row_count=$(tail -n +2 "$latest_file" | wc -l)
+            file_size=$(du -h "$latest_file" | cut -f1)
+            
+            commit_msg="📊 Daily leaderboard data: $current_date"
+            commit_msg="$commit_msg\n\n✨ Corrected version with properly unnested columns"
+            commit_msg="$commit_msg\n📁 Total CSV files: $csv_count"
+            commit_msg="$commit_msg\n📈 Latest file: $(basename $latest_file) ($file_size, $row_count rows)"
+            commit_msg="$commit_msg\n🏆 Columns: day_pnl, week_pnl, month_pnl, allTime_pnl (+ roi, volume)"
+            commit_msg="$commit_msg\n⏰ Collected: $(date -u)"
+            
+            git commit -m "$commit_msg"
+          else
+            git commit -m "📊 Daily leaderboard data: $current_date (corrected version)"
+          fi
+          
+          git push
+          echo "✅ Data committed and pushed successfully"
+        else
+          echo "ℹ️ No changes to commit"
+        fi
