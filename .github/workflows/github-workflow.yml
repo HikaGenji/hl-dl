@@ -45,9 +45,9 @@ jobs:
         
     - name: Verify data structure
       run: |
-        if [ -f data/leaderboard_*.csv ]; then
-          echo "✅ CSV file created successfully"
-          latest_file=$(ls -t data/leaderboard_*.csv | head -1)
+        if [ -f data/leaderboard_*.parquet ]; then
+          echo "✅ parquet file created successfully"
+          latest_file=$(ls -t data/leaderboard_*.parquet | head -1)
           echo "📊 Latest file: $latest_file"
           echo "📈 File size: $(du -h $latest_file)"
           echo "🔢 Row count: $(wc -l < $latest_file)"
@@ -58,7 +58,7 @@ jobs:
           echo "👀 First data row preview:"
           sed -n '2p' $latest_file | cut -d',' -f1-10
         else
-          echo "❌ No CSV file found"
+          echo "❌ No parquet file found"
           exit 1
         fi
         
@@ -84,7 +84,7 @@ jobs:
             
             commit_msg="📊 Daily leaderboard data: $current_date"
             commit_msg="$commit_msg\n\n✨ Corrected version with properly unnested columns"
-            commit_msg="$commit_msg\n📁 Total CSV files: $csv_count"
+            commit_msg="$commit_msg\n📁 Total parquet files: $csv_count"
             commit_msg="$commit_msg\n📈 Latest file: $(basename $latest_file) ($file_size, $row_count rows)"
             commit_msg="$commit_msg\n🏆 Columns: day_pnl, week_pnl, month_pnl, allTime_pnl (+ roi, volume)"
             commit_msg="$commit_msg\n⏰ Collected: $(date -u)"
