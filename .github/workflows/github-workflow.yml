@@ -45,7 +45,7 @@ jobs:
         
     - name: Verify data structure
       run: |
-        if [ -f data/leaderboard_*.parquet ]; then
+        if ls data/leaderboard_*.parquet 1> /dev/null 2>&1; then
           echo "✅ parquet file created successfully"
           latest_file=$(ls -t data/leaderboard_*.parquet | head -1)
           echo "📊 Latest file: $latest_file"
