@@ -2,7 +2,7 @@
 import requests
 import pandas as pd
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 import logging
 
@@ -87,8 +87,8 @@ def save_to_csv(df, output_dir='data'):
     os.makedirs(output_dir, exist_ok=True)
 
     # Generate filename with current date
-    current_date = datetime.utcnow().strftime('%Y-%m-%d')
-    filename = f"leaderboard_{current_date}.parquet"
+    current_datetime = datetime.now(timezone.utc)
+    filename = f"leaderboard_{current_datetime.strftime('%Y-%m-%d')}.parquet"
     filepath = os.path.join(output_dir, filename)
 
     # Save to parquet
