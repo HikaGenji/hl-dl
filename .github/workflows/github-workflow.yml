@@ -75,8 +75,8 @@ jobs:
           current_date=$(date -u +"%Y-%m-%d")
           
           # Count files and get latest file info
-          csv_count=$(ls data/leaderboard_*.csv 2>/dev/null | wc -l)
-          latest_file=$(ls -t data/leaderboard_*.csv 2>/dev/null | head -1)
+          csv_count=$(ls data/leaderboard_*.parquet 2>/dev/null | wc -l)
+          latest_file=$(ls -t data/leaderboard_*.parquet 2>/dev/null | head -1)
           
           if [ -f "$latest_file" ]; then
             row_count=$(tail -n +2 "$latest_file" | wc -l)
