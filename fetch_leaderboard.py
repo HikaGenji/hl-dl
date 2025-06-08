@@ -88,7 +88,7 @@ def save_to_csv(df, output_dir='data'):
 
     # Generate filename with current date
     current_datetime = datetime.now(timezone.utc)
-    filename = f"leaderboard_{current_datetime.strftime('%Y-%m-%d')}.parquet"
+    filename = f"leaderboard_{current_datetime.strftime('%Y-%m-%dT%H:%M:%S')}.parquet"
     filepath = os.path.join(output_dir, filename)
 
     # Save to parquet
